@@ -11,15 +11,3 @@ import dagger.hilt.testing.TestInstallIn
 import javax.inject.Singleton
 
 
-@Module
-@TestInstallIn(
-    components = [SingletonComponent::class],
-    replaces = [ModelModule::class]
-)
-@InstallIn
-abstract class  TestModule {
-
-    @Singleton
-    @Binds
-    abstract fun bindCalendarModel(model : CalendarModelImpl): CalendarModel
-}
