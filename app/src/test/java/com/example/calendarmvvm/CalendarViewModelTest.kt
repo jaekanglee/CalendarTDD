@@ -1,5 +1,7 @@
 package com.example.calendarmvvm
 
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.lifecycle.Observer
 import com.example.calendarmvvm.di.ModelModule
 import com.example.calendarmvvm.model.CalendarModel
 import com.example.calendarmvvm.model.CalendarModelImpl
@@ -24,40 +26,53 @@ import org.robolectric.annotation.Config
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@UninstallModules(ModelModule::class)
-@Config(sdk=[29],application = HiltTestApplication::class)
+@Config(sdk = [29], application = HiltTestApplication::class)
 @HiltAndroidTest
 @RunWith(RobolectricTestRunner::class)
- class CalendarViewModelTest {
+class CalendarViewModelTest {
 
-   @Module
-   @InstallIn(SingletonComponent::class)
-   abstract class  TestModule {
-
-      @Singleton
-      @Binds
-      abstract fun bindCalendarModel(model : CalendarModelImpl): CalendarModel
-
-   }
-
+//   @Module
+//   @InstallIn(SingletonComponent::class)
+//   abstract class  TestModule {
+//
+//      @Singleton
+//      @Binds
+//      abstract fun bindCalendarModel(model : CalendarModelImpl): CalendarModel
+//
+//   }
 
 
     @get:Rule
     var hiltRule = HiltAndroidRule(this)
 
-     @Inject lateinit var  model : CalendarModel
+    @get:Rule
+    var instantExecutorRule = InstantTaskExecutorRule()
 
-     lateinit var viewmodel :CalendarVmImpl
+    @Inject
+    lateinit var model: CalendarModel
+
+    lateinit var viewmodel: CalendarVmImpl
+
     @Before
-    fun setUp(){
+    fun setUp() {
         hiltRule.inject()
 
         viewmodel = CalendarVmImpl(model)
     }
 
     @Test
-    fun `sdfsdf`(){
-        viewmodel.onClickBeforeMonthBtn()
-        Assert.assertEquals(viewmodel.titleYear.value,99)
+    fun `sdfsdf`() {
+        val observer = Observer<Event<Int>> {}
+
+        viewmodel.titleYear.observeForever(observer)
+
+        try {
+            viewmodel.onClickBeforeMonthBtn()
+            val value = viewmodel.titleYear.value
+            Assert.assertEquals(value?.getContentIfNotHandled(), 1)
+        } catch (e: Exception) {
+            viewmodel.titleYear.removeObserver(observer)
+        }
+
     }
 }
