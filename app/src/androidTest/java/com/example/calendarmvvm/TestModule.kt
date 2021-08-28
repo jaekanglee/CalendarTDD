@@ -1,21 +1,23 @@
-package com.example.calendarmvvm.di
+package com.example.calendarmvvm
 
+import com.example.calendarmvvm.di.ModelModule
 import com.example.calendarmvvm.model.CalendarModel
 import com.example.calendarmvvm.model.CalendarModelImpl
 import dagger.Binds
 import dagger.Module
-import dagger.Provides
-import dagger.Reusable
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ViewModelComponent
-import dagger.hilt.android.scopes.ViewModelScoped
 import dagger.hilt.components.SingletonComponent
+import dagger.hilt.testing.TestInstallIn
 import javax.inject.Singleton
 
 
 @Module
-@InstallIn(SingletonComponent::class)
-abstract class  ModelModule {
+@TestInstallIn(
+    components = [SingletonComponent::class],
+    replaces = [ModelModule::class]
+)
+@InstallIn
+abstract class  TestModule {
 
     @Singleton
     @Binds

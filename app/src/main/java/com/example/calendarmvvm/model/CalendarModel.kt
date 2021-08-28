@@ -1,6 +1,7 @@
 package com.example.calendarmvvm.model
 
 import android.util.Log
+import dagger.hilt.android.scopes.ViewModelScoped
 import java.util.*
 import javax.inject.Inject
 import kotlin.collections.ArrayList
@@ -32,7 +33,8 @@ interface CalendarModel {
     fun createBlankDayToList(): List<DayListEntity>
 }
 
-class CalendarModelImpl @Inject constructor() : CalendarModel {
+
+class CalendarModelImpl @Inject constructor(): CalendarModel {
     var cInstance: Calendar? = null
 
     override fun initCalendarInstance() {

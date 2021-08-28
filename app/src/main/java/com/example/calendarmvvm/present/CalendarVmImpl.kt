@@ -20,7 +20,7 @@ interface ICalendarVm{
 @HiltViewModel
 class CalendarVmImpl @Inject constructor(
     private val model : CalendarModel
-) : ViewModel() {
+) : ViewModel() ,ICalendarVm{
 
 
     private val _titleYear = MutableLiveData(0)
@@ -37,6 +37,21 @@ class CalendarVmImpl @Inject constructor(
         MutableLiveData(this as List<DayListEntity>)
     }
 
+    override fun onClickBeforeMonthBtn() {
+        _titleYear.value=1
+    }
+
+    override fun onClickNextMonthBtn() {
+        TODO("Not yet implemented")
+    }
+
+    override fun onClickYearBtn() {
+        TODO("Not yet implemented")
+    }
+
+    override fun onClickMonthBtn() {
+        TODO("Not yet implemented")
+    }
 
 
 }
