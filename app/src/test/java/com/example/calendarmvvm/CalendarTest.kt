@@ -9,6 +9,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 @RunWith(JUnit4::class)
@@ -56,8 +57,8 @@ class CalendarTest {
 
     @Test
     fun `4_setDay()는 입력받은 일을 설정한다`() {
-        calendarModelImpl.setDay(31)
-        Assert.assertEquals(31, calendarModelImpl.getDay())
+        calendarModelImpl.setDay(5)
+        Assert.assertEquals(5, calendarModelImpl.getDay())
     }
 
     //테스트 케이스의 SRP를 위반
@@ -89,14 +90,14 @@ class CalendarTest {
 
     @Test
     fun `7_clickToBeforeMonth()는 1~12사이의 값을 반환한다`() {
-        val month = calendarModelImpl.clickToBeforeMonth()
+        val month = calendarModelImpl.beforeMonth()
         Assert.assertTrue(month in 1..12)
     }
 
     @Test
     fun `8_clickToBeforeMonth()는 1월 이전 0월이 아닌 12월로 변경된다`() {
         calendarModelImpl.cInstance?.set(Calendar.MONTH, 0)
-        val month = calendarModelImpl.clickToBeforeMonth()
+        val month = calendarModelImpl.beforeMonth()
         Assert.assertEquals(month, 12)
     }
 
@@ -105,7 +106,7 @@ class CalendarTest {
     fun `9_clickToBeforeMonth()는 현재 달 -1값과 동일하다 `() {
         val currentMonth = calendarModelImpl.cInstance?.get(Calendar.MONTH) ?: 0
         val beforeMonth = calendarModelImpl.run {
-            clickToBeforeMonth()
+            beforeMonth()
             cInstance?.get(Calendar.MONTH)
         }
         println("beforeMonth : $beforeMonth")
@@ -114,14 +115,14 @@ class CalendarTest {
 
     @Test
     fun `10_clickToNextMonth()는 1 ~ 12 사이의 값을 반환한다`() {
-        val month = calendarModelImpl.clickToNextMonth()
+        val month = calendarModelImpl.nextMonth()
         Assert.assertTrue(month in 1..12)
     }
 
     @Test
     fun `11_clickToNextMonth()는 12월 이후에 13월이 아닌 1월로 변경된다`() {
         calendarModelImpl.cInstance?.set(Calendar.MONTH, 12)
-        val month = calendarModelImpl.clickToNextMonth()
+        val month = calendarModelImpl.nextMonth()
         println("Next Month :$month")
         Assert.assertTrue(month == 1)
     }
@@ -130,7 +131,7 @@ class CalendarTest {
     fun `12_clickToNextMonth()는 현재 달 +1값과 동일하다 `() {
         val currentMonth = calendarModelImpl.cInstance?.get(Calendar.MONTH) ?: 0
         val nextMonth = calendarModelImpl.run {
-            clickToNextMonth()
+            nextMonth()
             cInstance?.get(Calendar.MONTH)
         }
         Assert.assertEquals(currentMonth + 1, nextMonth)
@@ -179,11 +180,6 @@ class CalendarTest {
     }
 
 
-    @Test
-    fun `18_getDetectFirstDayOfWeek()는 2021년8월의 1일 요일을 1로 반환한다`() {
-        val firstDayOfWeek = calendarModelImpl.getDetectFirstDayOfWeek()
-        Assert.assertEquals(firstDayOfWeek, 1)
-    }
 
     @Test
     fun `19_getDetectFirstDayOfWeek()는 2021년7월의 1일 요일을 5로 반환한다`() {
@@ -208,19 +204,6 @@ class CalendarTest {
     }
 
 
-    @Test
-    fun `21_createBlankDayToList()는 현재 월 시작요일 전 빈값값에 대한 블랭크 리스트를 올바르에 ADD한다(카운트)`() {
-        val items = calendarModelImpl.createBlankDayToList()
-        Assert.assertEquals(items.count(), 0)
-    }
-
-    @Test
-    fun `22_createBlankDayToList()는 2021년7 시작요일 전 빈값에 대한 블랭크 리스트를 올바르게 ADD한다(카운트)`() {
-        calendarModelImpl.cInstance?.set(Calendar.MONTH, 6)
-        val items = calendarModelImpl.createBlankDayToList()
-        Assert.assertEquals(items.count(), 4)
-    }
-
 
     @Test
     fun `23_getDayList()는 현재 월 달력의 0번째 셀부터 마지막 날까지의 리스트 갯수를 올바르게 생성한다`() {
@@ -228,12 +211,6 @@ class CalendarTest {
         Assert.assertEquals(itemsCount, 31)
     }
 
-    @Test
-    fun `24_getDayList()는 2021년7월 달력의 0번째 셀부터 마지막 날까지의 리스트 갯수를 올바르게 생성한다`() {
-        calendarModelImpl.setMonth(7)
-        val itemsCount = calendarModelImpl.getDayList().size
-        Assert.assertEquals(itemsCount, 35)
-    }
 
     @Test
     fun `25_getDayList()의 마지막 요소의 Value는 현재 월의 마지막 Day값과 일치한다`() {
@@ -241,13 +218,41 @@ class CalendarTest {
         Assert.assertEquals(calendarModelImpl.getDayList().last().value, lastDay)
     }
 
+
+
     @Test
-    fun `26_getDayList()의 마지막 요소의 Value는 2021년07월의 마지막 Day값과 일치한다`() {
-        calendarModelImpl.setMonth(7)
-        val lastDay = Calendar.getInstance().getActualMaximum(Calendar.DATE)
-        Assert.assertEquals(calendarModelImpl.getDayList().last().value, lastDay)
+    fun `createYearList()는 1930 ~ 2025 리스트를 만든다`(){
+        val testArray = ArrayList<String>().apply{
+            (1930 .. 2025).map {
+                add("$it")
+            }
+        }
+        var valid = true
+        calendarModelImpl.getYearList().mapIndexed{index, item ->
+            if(testArray[index] != item){
+                valid=false
+                return@mapIndexed
+            }
+        }
+        Assert.assertEquals(true,valid)
     }
 
+    @Test
+    fun `createMonthList()는 1~12월 리스트를 만든다`(){
+        val testArray = ArrayList<String>().apply{
+            (1 .. 12).map {
+                add("$it")
+            }
+        }
+        var valid = true
+        calendarModelImpl.getMonthList().mapIndexed{index, item ->
+            if(testArray[index] != item){
+                valid=false
+                return@mapIndexed
+            }
+        }
+        Assert.assertEquals(true,valid)
+    }
 
     @After
     fun finish() {

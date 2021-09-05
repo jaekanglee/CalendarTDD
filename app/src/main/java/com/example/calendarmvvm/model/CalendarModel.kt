@@ -2,6 +2,8 @@ package com.example.calendarmvvm.model
 
 import android.util.Log
 import dagger.hilt.android.scopes.ViewModelScoped
+import io.reactivex.Observable
+import io.reactivex.Single
 import java.util.*
 import javax.inject.Inject
 import kotlin.collections.ArrayList
@@ -12,9 +14,11 @@ interface CalendarModel {
     fun getYear(): Int
     fun getMonth(): Int
     fun getDay(): Int
-    fun clickToBeforeMonth(): Int
-    fun clickToNextMonth(): Int
+    fun beforeMonth(): Int
+    fun nextMonth(): Int
     fun getCurrentDate(): String
+    fun createYearList()
+    fun createMonthlist()
 
     fun getDetectFirstDayOfWeek(): Int
 
@@ -31,14 +35,24 @@ interface CalendarModel {
     fun getDayList(): List<DayListEntity>
 
     fun createBlankDayToList(): List<DayListEntity>
+
+    fun getYearList(): List<String>
+
+    fun getMonthList(): List<String>
 }
 
 
-class CalendarModelImpl @Inject constructor(): CalendarModel {
+class CalendarModelImpl @Inject constructor() : CalendarModel {
     var cInstance: Calendar? = null
+
+    private val yearList = ArrayList<String>()
+    private val monthList = ArrayList<String>()
+
 
     override fun initCalendarInstance() {
         cInstance = Calendar.getInstance()
+        createYearList()
+        createMonthlist()
     }
 
     override fun getYear(): Int {
@@ -60,7 +74,7 @@ class CalendarModelImpl @Inject constructor(): CalendarModel {
         return cInstance?.get(Calendar.DAY_OF_MONTH) ?: 0
     }
 
-    override fun clickToBeforeMonth(): Int {
+    override fun beforeMonth(): Int {
         cInstance ?: throw NullPointerException("Calendar Instance is Null")
 
         val currentMonth = cInstance?.get(Calendar.MONTH)
@@ -75,7 +89,7 @@ class CalendarModelImpl @Inject constructor(): CalendarModel {
     }
 
 
-    override fun clickToNextMonth(): Int {
+    override fun nextMonth(): Int {
         cInstance ?: throw NullPointerException("Calendar Instance is Null")
         val currentMonth = cInstance?.get(Calendar.MONTH)
         currentMonth ?: throw NullPointerException("current Month Instance is Null")
@@ -90,6 +104,21 @@ class CalendarModelImpl @Inject constructor(): CalendarModel {
         } ?: kotlin.run {
             throw NullPointerException("Not fount Calendar Data")
         }
+    }
+
+    override fun createYearList() {
+        if (yearList.size == 0) {
+            (1930..2025).map {
+                yearList.add("$it")
+            }
+        }
+    }
+
+    override fun createMonthlist() {
+        if (monthList.size == 0)
+            (1..12).map {
+                monthList.add("$it")
+            }
     }
 
     override fun isToday(today: String): Boolean {
@@ -172,10 +201,10 @@ class CalendarModelImpl @Inject constructor(): CalendarModel {
         createBlankDayToList().run {
             result.addAll(this)
         }
-        return lastDayOfMonth?.let {lastDay ->
+        return lastDayOfMonth?.let { lastDay ->
 
-            for(i in 1 .. lastDay){
-                DayListEntity(DayListType.DAY, i).run{
+            for (i in 1..lastDay) {
+                DayListEntity(DayListType.DAY, i).run {
                     result.add(this)
                 }
             }
@@ -198,6 +227,14 @@ class CalendarModelImpl @Inject constructor(): CalendarModel {
             }
         }
         return result
+    }
+
+    override fun getYearList(): List<String> {
+        return yearList
+    }
+
+    override fun getMonthList(): List<String> {
+        return monthList
     }
 
 }

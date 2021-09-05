@@ -23,6 +23,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -41,6 +42,8 @@ class CalendarViewModelTest {
 //
 //   }
 
+    @get:Rule
+    val rxSchedulerRule = RxSchedulerRule()
 
     @get:Rule
     var hiltRule = HiltAndroidRule(this)
@@ -61,18 +64,83 @@ class CalendarViewModelTest {
     }
 
     @Test
-    fun `sdfsdf`() {
-        val observer = Observer<Event<Int>> {}
+    fun `onClickBeforeMonthBtn는 현재 달 + 1을 정확히 반환한다`() {
 
-        viewmodel.titleYear.observeForever(observer)
-
-        try {
-            viewmodel.onClickBeforeMonthBtn()
-            val value = viewmodel.titleYear.value
-            Assert.assertEquals(value?.getContentIfNotHandled(), 1)
-        } catch (e: Exception) {
-            viewmodel.titleYear.removeObserver(observer)
+        val currentMonth = Calendar.getInstance().run {
+            get(Calendar.MONTH)+1
         }
+        val observable = viewmodel.titleMonth.testObserver()
 
+        viewmodel.onClickBeforeMonthBtn()
+        Assert.assertEquals(observable.observedValues.value?.peekContent(), currentMonth-1)
+
+    }
+
+    @Test
+    fun `onClickNextMonthBtn는 현재 달 +1을 정확히 반환한`(){
+        val currentMonth = Calendar.getInstance().run {
+            get(Calendar.MONTH)+1
+        }
+        val observable = viewmodel.titleMonth.testObserver()
+
+        viewmodel.onClickNextMonthBtn()
+        Assert.assertEquals(observable.observedValues.value?.peekContent(), currentMonth+1)
+    }
+
+    @Test
+    fun `onClickYearBtn()은 1930 ~ 2025년까지 리스트를 반환한다`(){
+        var isCorrect =false
+        for(i in 0 .. 100){
+            viewmodel.initCalendarModel()
+            viewmodel.onClickYearBtn()
+            val yearList=viewmodel.yearList.value?.peekContent()
+            if(yearList.isNullOrEmpty()){
+                Assert.fail()
+            }
+            else{
+                val firstValue = yearList[0] =="1930"
+                val lastValue = yearList[yearList.size-1] =="2025"
+                isCorrect = firstValue && lastValue
+                println("${firstValue}/${lastValue} / ${isCorrect}")
+                if(!isCorrect)
+                    break
+            }
+        }
+        Assert.assertEquals(isCorrect,true)
+    }
+
+    @Test
+    fun `onCLickMonthBtn()은 1 ~12월 리스트를 반환한다`(){
+        var isCorrect =false
+        for(i in 0 .. 100){
+            viewmodel.initCalendarModel()
+            viewmodel.onClickMonthBtn()
+            val monthList=viewmodel.monthList.value?.peekContent()
+            if(monthList.isNullOrEmpty()){
+                Assert.fail()
+            }
+            else{
+                val firstValue = monthList[0] =="1"
+                val lastValue = monthList[monthList.size-1] =="12"
+                isCorrect = firstValue && lastValue
+                println("${firstValue}/${lastValue} / ${isCorrect}")
+                if(!isCorrect)
+                    break
+            }
+        }
+        Assert.assertEquals(isCorrect,true)
+    }
+
+
+    @Test
+    fun `getDayListOnCurrentMonth()는 현재 달의 일 리스트를 모두 반환한다`(){
+        viewmodel.initCalendarModel()
+        viewmodel.getDayListOnCurrentMonth()
+        val result =viewmodel.dayList.value?.peekContent()
+        if(result.isNullOrEmpty())
+            Assert.fail()
+
+        println("----------------\n${result}\n-------------------")
+        Assert.assertEquals(result!=null,true)
     }
 }
