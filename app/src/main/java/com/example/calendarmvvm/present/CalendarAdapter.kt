@@ -24,15 +24,4 @@ class CalendarAdapter(
         return listener.getItemsSize()
     }
 
-
-    class ItemViewHolder(
-        private val binding: ItemCalendarDayBinding
-    ) : RecyclerView.ViewHolder(binding.root) {
-
-
-        fun bind(item: DayListEntity?) {
-            binding.day = item?.value.toString()
-            binding.executePendingBindings()
-        }
-    }
 }
