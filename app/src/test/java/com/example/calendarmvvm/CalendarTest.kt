@@ -1,6 +1,5 @@
 package com.example.calendarmvvm
 
-import com.example.calendarmvvm.model.CalendarModel
 import com.example.calendarmvvm.model.CalendarModelImpl
 import org.junit.After
 import org.junit.Assert
@@ -252,6 +251,12 @@ class CalendarTest {
             }
         }
         Assert.assertEquals(true,valid)
+    }
+
+    @Test
+    fun `createWeeksOfDays()를 실행한 후 리스트의 사이즈는 7이다 `() {
+        val result = calendarModelImpl.createWeeksOfDays()
+        Assert.assertTrue( result.size == 7)
     }
 
     @After
